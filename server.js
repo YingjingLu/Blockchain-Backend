@@ -33,11 +33,13 @@ app.post('/upload', (req, res) => {
 app.get('/player_state/run_id/:run_id/round/:round', (req, res) => {
     const run_name = req.params.run_id;
     const round = req.params.round;
+    console.log("got round " + round + " run_name " + run_name)
     const file_path = util.get_player_state_file_name(run_name, round);
     if (!util.file_exists(file_path)) {
         return res.status(500).send({msg: "file not found" + file_path});
     }
     const json_body = util.read_json_file(file_path);
+    console.log(json_body)
     return res.status(200).send({data: json_body});
 });
 

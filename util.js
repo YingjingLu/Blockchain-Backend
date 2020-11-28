@@ -41,12 +41,12 @@ function get_all_run() {
 
 function get_player_state_file_name(root_folder, round) {
     const path = root_folder + "/player_state_trace/" + round.toString() + ".json";
-    return get_abs_path(path);
+    return get_abs_extracted_folder_from_run_name(path);
 }
 
 function get_message_file_name(root_folder, round) {
     const path = root_folder + "/message_trace/" + round.toString() + ".json";
-    return get_abs_path(path);
+    return get_abs_extracted_folder_from_run_name(path);
 }
 
 function execute_java_backend(zip_path) {
