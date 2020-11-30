@@ -60,6 +60,16 @@ app.get('/list_run', (req, res) => {
 });
 
 
+app.get('/streamlet_config/run_id/:run_id', (req, res) => {
+    const run_name = req.params.run_id;
+    const file_path = util.get_config_file_path(run_name);
+    if (!util.file_exists(file_path)) {
+        return res.status(500).send({message: 'Config file not found for ' + run_name});
+    }
+    const json_body = util.read_json_file(file_path);
+    return res.status(200).send({data: json_body.streamlet_config});
+});
+
 app.listen(4500, () => {
     mkdirp.sync(util.get_abs_extracted_folder());
     console.log('Server listening on port 4500');

@@ -61,6 +61,11 @@ function execute_java_backend(zip_path) {
     });
 } 
 
+function get_config_file_path(run_name) {
+    const path = run_name + '/config.json';
+    return get_abs_extracted_folder_from_run_name(path);
+}
+
 module.exports = {
     extract_zip_file,
     get_abs_extracted_folder,
@@ -73,5 +78,6 @@ module.exports = {
     delete_file,
     get_run_name_from_zip,
     get_abs_extracted_folder_from_run_name,
-    get_all_run
+    get_all_run,
+    get_config_file_path
 };
