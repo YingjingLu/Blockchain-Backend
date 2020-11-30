@@ -40,7 +40,13 @@ function get_all_run() {
 }
 
 function get_player_state_file_name(root_folder, round) {
-    const path = root_folder + "/player_state_trace/" + round.toString() + ".json";
+    var round_string;
+    if (round == -1) {
+        round_string = 'init';
+    } else {
+        round_string = round.toString();
+    }
+    const path = root_folder + "/player_state_trace/" + round_string + ".json";
     return get_abs_extracted_folder_from_run_name(path);
 }
 
@@ -51,12 +57,14 @@ function get_message_file_name(root_folder, round) {
 
 function execute_java_backend(zip_path) {
     var exec = require('child_process').exec, child;
-    child = exec('/usr/bin/java -jar ~/Applications/example.jar' + ' ' + zip_path,
+    child = exec('java -cp ' 
+        + 'C:\\Users\\StevenLu\\Desktop\\BlockchainSimulator\\blockchain-simulator\\target\\blockchain-simulator-1.0-SNAPSHOT-jar-with-dependencies.jar' 
+        + ' ' + 'com.blockchain.simulator.App' + ' ' + zip_path,
     function (error, stdout, stderr){
         console.log('stdout: ' + stdout);
         console.log('stderr: ' + stderr);
         if(error !== null){
-        console.log('exec error: ' + error);
+            console.log('exec error: ' + error);
         }
     });
 } 

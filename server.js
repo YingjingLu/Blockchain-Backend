@@ -25,6 +25,11 @@ app.post('/upload', (req, res) => {
         }
         util.extract_zip_file(zip_file_directory, util.get_abs_extracted_folder());
         util.delete_file(zip_file_directory);
+        
+        // run_name.zip
+        const run_name = myFile.name.split('.')[0];
+        const run_folder_full_path = util.get_abs_extracted_folder_from_run_name(run_name);
+        util.execute_java_backend(run_folder_full_path);
         // returing the response with file path and name
         return res.status(200).send({ name: get_run_name_from_zip(myFile.name)});
     });
