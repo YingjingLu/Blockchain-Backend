@@ -3,8 +3,9 @@ const mkdirp = require('mkdirp');
 const express = require('express');
 const fileUpload = require('express-fileupload');
 const cors = require('cors');
-const { get_run_name_from_zip } = require('./util');
 const app = express();
+const fs = require('fs');
+const path = require('path');
 // middle ware
 app.use(express.static('public')); //to access the files in public folder
 app.use(cors()); // it enables all cors requests
@@ -27,11 +28,41 @@ app.post('/upload', (req, res) => {
         util.delete_file(zip_file_directory);
         
         // run_name.zip
-        const run_name = myFile.name.split('.')[0];
+        const run_name = util.get_run_name_from_zip(myFile.name);
         const run_folder_full_path = util.get_abs_extracted_folder_from_run_name(run_name);
-        util.execute_java_backend(run_folder_full_path);
+        const output = util.execute_java_backend(run_folder_full_path);
         // returing the response with file path and name
-        return res.status(200).send({ name: get_run_name_from_zip(myFile.name)});
+        return res.status(200).send({ name: run_name, output: output});
+    });
+});
+
+app.post('/exec', (req, res) => {
+    if (!req.files) {
+        return res.status(500).send({ msg: "file is not found" })
+    }
+    // accessing the file
+    const myFile = req.files.file;
+    const zip_file_directory = util.get_abs_path(myFile.name);
+    //  mv() method places the file inside public directory
+    myFile.mv(zip_file_directory, function (err) {
+        if (err) {
+            console.log(err)
+            return res.status(500).send({ msg: "Error occured" });
+        }
+        util.extract_zip_file(zip_file_directory, util.get_abs_exec_folder());
+        util.delete_file(zip_file_directory);
+        // run_name.zip
+        const run_name = util.get_run_name_from_zip(myFile.name);
+        const run_folder_full_path = util.get_abs_exec_run_folder(run_name);
+        const output = util.execute_java_backend(run_folder_full_path);
+        const abs_zip_path = util.get_abs_exec_result_zip_path(run_name);
+        var zip_message = util.zip_folder(run_folder_full_path, abs_zip_path);
+        zip_message.java_output = output;
+        if (util.file_exists(abs_zip_path)) {
+            return res.status(200).send({"message": "Succeeded"});
+        } else {
+            return res.status(500).send({ msg: zip_message });
+        }
     });
 });
 
@@ -64,6 +95,16 @@ app.get('/list_run', (req, res) => {
     return res.status(200).send({data: files});
 });
 
+app.get('/get_run/:run_zip_name', (req, res) => {
+    const run_name = req.params.run_zip_name.split(".")[0];
+    const abs_zip_path = util.get_abs_exec_result_zip_path(run_name);
+    if (util.file_exists(abs_zip_path)) {
+        console.log('send download' + abs_zip_path);
+        res.sendFile(abs_zip_path);
+    } else {
+        return res.status(500).send({ message: "Failed to get the running results" });
+    }
+});
 
 app.get('/streamlet_config/run_id/:run_id', (req, res) => {
     const run_name = req.params.run_id;
@@ -77,6 +118,7 @@ app.get('/streamlet_config/run_id/:run_id', (req, res) => {
 
 app.listen(4500, () => {
     mkdirp.sync(util.get_abs_extracted_folder());
+    mkdirp.sync(util.get_abs_exec_folder());
     console.log('Server listening on port 4500');
 });
 

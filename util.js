@@ -1,9 +1,26 @@
 const FS = require('fs');
 const ZIP = require('adm-zip');
+const ARCHIVER = require('archiver');
 
 function extract_zip_file(src_zip_path, target_path) {
     const zip = new ZIP(src_zip_path);
     zip.extractAllTo(target_path, true);
+}
+
+function zip_folder(src_folder_path, output_zip_path) {
+    const output = FS.createWriteStream(output_zip_path);
+    const archive = ARCHIVER('zip');
+    var zip_message = {"output_zip": output_zip_path};
+    output.on('close', function() {
+        zip_message.output = (archive.pointer() + ' total bytes');
+    });
+    archive.on('error', function(err){
+        zip_message.error = err;
+    });
+    archive.pipe(output);
+    archive.directory(src_folder_path, false);
+    archive.finalize();
+    return zip_message;
 }
 
 function delete_file(path) {
@@ -16,6 +33,18 @@ function get_run_name_from_zip(zip_name) {
 
 function get_abs_extracted_folder() {
     return `${__dirname}/public/run/`;
+}
+
+function get_abs_exec_folder() {
+    return `${__dirname}/public/exec/`;
+}
+
+function get_abs_exec_run_folder(run_name) {
+    return `${__dirname}/public/exec/${run_name}`;
+}
+
+function get_abs_exec_result_zip_path(run_name) {
+    return `${__dirname}/public/exec/${run_name}.zip`;
 }
 
 function get_abs_extracted_folder_from_run_name(run_name) {
@@ -55,18 +84,11 @@ function get_message_file_name(root_folder, round) {
     return get_abs_extracted_folder_from_run_name(path);
 }
 
-function execute_java_backend(zip_path) {
-    var exec = require('child_process').exec, child;
-    child = exec('java -cp ' 
-        + 'C:\\Users\\StevenLu\\Desktop\\BlockchainSimulator\\blockchain-simulator\\target\\blockchain-simulator-1.0-SNAPSHOT-jar-with-dependencies.jar' 
-        + ' ' + 'com.blockchain.simulator.App' + ' ' + zip_path,
-    function (error, stdout, stderr){
-        console.log('stdout: ' + stdout);
-        console.log('stderr: ' + stderr);
-        if(error !== null){
-            console.log('exec error: ' + error);
-        }
-    });
+function execute_java_backend(run_folder_path) {
+    var exec = require('child_process').execSync;
+    return exec('java -cp ' 
+        + '../blockchain-simulator/target/blockchain-simulator-1.0-SNAPSHOT-jar-with-dependencies.jar' 
+        + ' ' + 'com.blockchain.simulator.App' + ' ' + run_folder_path);
 } 
 
 function get_config_file_path(run_name) {
@@ -87,5 +109,9 @@ module.exports = {
     get_run_name_from_zip,
     get_abs_extracted_folder_from_run_name,
     get_all_run,
-    get_config_file_path
+    get_config_file_path,
+    zip_folder,
+    get_abs_exec_folder,
+    get_abs_exec_result_zip_path,
+    get_abs_exec_run_folder
 };
