@@ -31,6 +31,7 @@ app.post('/upload', (req, res) => {
         const run_name = util.get_run_name_from_zip(myFile.name);
         const run_folder_full_path = util.get_abs_extracted_folder_from_run_name(run_name);
         const output = util.execute_java_backend(run_folder_full_path);
+        console.log(run_folder_full_path);
         // returing the response with file path and name
         return res.status(200).send({ name: run_name, output: output});
     });
