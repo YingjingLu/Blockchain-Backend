@@ -32,7 +32,7 @@ app.post('/upload', (req, res) => {
         const run_folder_full_path = util.get_abs_extracted_folder_from_run_name(run_name);
         const output = util.execute_java_backend(run_folder_full_path);
         // returing the response with file path and name
-        return res.status(200).send({ name: run_name, output: output, path: run_folder_full_path});
+        return res.status(200).send({ name: run_name, path: run_folder_full_path});
     });
 });
 
