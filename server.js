@@ -86,7 +86,11 @@ app.get('/message/run_id/:run_id/round/:round', (req, res) => {
     if (!util.file_exists(file_path)) {
         return res.status(500).send({msg: "file not found" + file_path});
     }
+    const proposal_path = util.get_proposal_file_name(run_name, round);
     const json_body = util.read_json_file(file_path);
+    if (util.file_exists(proposal_path)) {
+        json_body.proposal = util.read_json_file(proposal_path);
+    }
     return res.status(200).send({data: json_body});
 });
 

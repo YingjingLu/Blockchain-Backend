@@ -84,6 +84,11 @@ function get_message_file_name(root_folder, round) {
     return get_abs_extracted_folder_from_run_name(path);
 }
 
+function get_proposal_file_name(root_folder, round) {
+    const path = root_folder + "/proposal_trace/" + round.toString() + ".json";
+    return get_abs_extracted_folder_from_run_name(path);
+}
+
 function execute_java_backend(run_folder_path) {
     var exec = require('child_process').execSync;
     return exec('java -cp ' 
@@ -113,5 +118,6 @@ module.exports = {
     zip_folder,
     get_abs_exec_folder,
     get_abs_exec_result_zip_path,
-    get_abs_exec_run_folder
+    get_abs_exec_run_folder,
+    get_proposal_file_name
 };
