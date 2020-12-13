@@ -144,7 +144,7 @@ app.get('/streamlet_config/run_id/:run_id', (req, res) => {
         const json_body = util.read_json_file(file_path);
         return res.status(200).send({data: json_body.streamlet_config});
     } catch (e) {
-        return res.status(500).send({message: e});
+        return res.status(500).send({message: e.toString()});
     }
     
 });
