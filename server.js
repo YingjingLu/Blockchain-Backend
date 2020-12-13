@@ -13,7 +13,7 @@ app.use(fileUpload());
 // file upload api
 app.post('/upload', (req, res) => {
     if (!req.files) {
-        return res.status(500).send({ msg: "file is not found" })
+        return res.status(500).send({ message: "file is not found" })
     }
     // accessing the file
     const myFile = req.files.file;
@@ -21,8 +21,7 @@ app.post('/upload', (req, res) => {
     //  mv() method places the file inside public directory
     myFile.mv(zip_file_directory, function (err) {
         if (err) {
-            console.log(err)
-            return res.status(500).send({ msg: "Error occured" });
+            return res.status(500).send({ message: "Error occured " + err });
         }
         util.extract_zip_file(zip_file_directory, util.get_abs_extracted_folder());
         util.delete_file(zip_file_directory);
@@ -44,7 +43,7 @@ app.post('/upload', (req, res) => {
             if (util.file_exists(abs_zip_path)) {
                 return res.status(200).send({ name: run_name, path: run_folder_full_path});
             } else {
-                return res.status(500).send({ msg: zip_message });
+                return res.status(500).send({ message: zip_message });
             }
         });
         // returing the response with file path and name
@@ -54,7 +53,7 @@ app.post('/upload', (req, res) => {
 
 app.post('/exec', (req, res) => {
     if (!req.files) {
-        return res.status(500).send({ msg: "file is not found" })
+        return res.status(500).send({ message: "file is not found" })
     }
 
     var exec = require('child_process').exec;
@@ -97,7 +96,7 @@ app.get('/player_state/run_id/:run_id/round/:round', (req, res) => {
     console.log("got round " + round + " run_name " + run_name)
     const file_path = util.get_player_state_file_name(run_name, round);
     if (!util.file_exists(file_path)) {
-        return res.status(500).send({msg: "file not found" + file_path});
+        return res.status(500).send({message: "file not found" + file_path});
     }
     const json_body = util.read_json_file(file_path);
     console.log(json_body)
@@ -109,7 +108,7 @@ app.get('/message/run_id/:run_id/round/:round', (req, res) => {
     const round = req.params.round;
     const file_path = util.get_message_file_name(run_name, round);
     if (!util.file_exists(file_path)) {
-        return res.status(500).send({msg: "file not found" + file_path});
+        return res.status(500).send({message: "file not found" + file_path});
     }
     const proposal_path = util.get_proposal_file_name(run_name, round);
     const json_body = util.read_json_file(file_path);
