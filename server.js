@@ -61,6 +61,7 @@ app.post('/exec', (req, res) => {
             + ' ' + 'com.blockchain.simulator.App' + ' ' + run_folder_full_path,
         (error, stdout, stderr) => {
             if (error) {
+                console.log(stderr);
                 return res.status(500).send({ message: stderr });
             }
             const abs_zip_path = util.get_abs_exec_result_zip_path(run_name);
