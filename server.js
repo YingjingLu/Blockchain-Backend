@@ -48,7 +48,7 @@ app.post('/upload', (req, res) => {
             }
         });
         // returing the response with file path and name
-        return res.status(200).send({ name: run_name, path: run_folder_full_path});
+        // return res.status(200).send({ name: run_name, path: run_folder_full_path});
     });
 });
 
