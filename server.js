@@ -78,14 +78,14 @@ app.post('/exec', (req, res) => {
         (error, stdout, stderr) => {
             if (error) {
                 console.log(stderr);
-                return res.status(500).send({ message: stderr });
+                return res.status(500).send(stderr);
             }
             const abs_zip_path = util.get_abs_exec_result_zip_path(run_name);
             var zip_message = util.zip_folder(run_folder_full_path, abs_zip_path);
             if (util.file_exists(abs_zip_path)) {
                 return res.status(200).send({"message": "Succeeded"});
             } else {
-                return res.status(500).send({ "message": zip_message });
+                return res.status(500).send(zip_message);
             }
         });
     });
