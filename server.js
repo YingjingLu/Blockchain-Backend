@@ -85,7 +85,7 @@ app.post('/exec', (req, res) => {
             if (util.file_exists(abs_zip_path)) {
                 return res.status(200).send({"message": "Succeeded"});
             } else {
-                return res.status(500).send({ msg: zip_message });
+                return res.status(500).send({ "message": zip_message });
             }
         });
     });
