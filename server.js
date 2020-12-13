@@ -106,7 +106,7 @@ app.get('/get_run/:run_zip_name', (req, res) => {
         console.log('send download' + abs_zip_path);
         res.sendFile(abs_zip_path);
     } else {
-        return res.status(500).send({ message: "Failed to get the running results" });
+        return res.status(500).send({ message: "Failed to get the running results due to network issue, try again usually works" });
     }
 });
 
