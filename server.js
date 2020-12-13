@@ -65,7 +65,6 @@ app.post('/exec', (req, res) => {
             }
             const abs_zip_path = util.get_abs_exec_result_zip_path(run_name);
             var zip_message = util.zip_folder(run_folder_full_path, abs_zip_path);
-            zip_message.java_output = output;
             if (util.file_exists(abs_zip_path)) {
                 return res.status(200).send({"message": "Succeeded"});
             } else {
