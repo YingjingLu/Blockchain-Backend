@@ -26,11 +26,27 @@ app.post('/upload', (req, res) => {
         }
         util.extract_zip_file(zip_file_directory, util.get_abs_extracted_folder());
         util.delete_file(zip_file_directory);
-        
+        var exec = require('child_process').exec;
         // run_name.zip
         const run_name = util.get_run_name_from_zip(myFile.name);
         const run_folder_full_path = util.get_abs_extracted_folder_from_run_name(run_name);
-        const output = util.execute_java_backend(run_folder_full_path);
+
+        exec('java -cp ' 
+            + '../blockchain-simulator/target/blockchain-simulator-1.0-SNAPSHOT-jar-with-dependencies.jar' 
+            + ' ' + 'com.blockchain.simulator.App' + ' ' + run_folder_full_path,
+        (error, stdout, stderr) => {
+            if (error) {
+                console.log(stderr);
+                return res.status(500).send({ message: stderr });
+            }
+            const abs_zip_path = util.get_abs_exec_result_zip_path(run_name);
+            var zip_message = util.zip_folder(run_folder_full_path, abs_zip_path);
+            if (util.file_exists(abs_zip_path)) {
+                return res.status(200).send({ name: run_name, path: run_folder_full_path});
+            } else {
+                return res.status(500).send({ msg: zip_message });
+            }
+        });
         // returing the response with file path and name
         return res.status(200).send({ name: run_name, path: run_folder_full_path});
     });
@@ -74,38 +90,6 @@ app.post('/exec', (req, res) => {
         });
     });
 });
-/**
- 
-app.post('/exec', (req, res) => {
-    if (!req.files) {
-        return res.status(500).send({ msg: "file is not found" })
-    }
-    // accessing the file
-    const myFile = req.files.file;
-    const zip_file_directory = util.get_abs_path(myFile.name);
-    //  mv() method places the file inside public directory
-    myFile.mv(zip_file_directory, function (err) {
-        if (err) {
-            console.log(err)
-            return res.status(500).send({ msg: "Error occured" });
-        }
-        util.extract_zip_file(zip_file_directory, util.get_abs_exec_folder());
-        util.delete_file(zip_file_directory);
-        // run_name.zip
-        const run_name = util.get_run_name_from_zip(myFile.name);
-        const run_folder_full_path = util.get_abs_exec_run_folder(run_name);
-        const output = util.execute_java_backend(run_folder_full_path);
-        const abs_zip_path = util.get_abs_exec_result_zip_path(run_name);
-        var zip_message = util.zip_folder(run_folder_full_path, abs_zip_path);
-        zip_message.java_output = output;
-        if (util.file_exists(abs_zip_path)) {
-            return res.status(200).send({"message": "Succeeded"});
-        } else {
-            return res.status(500).send({ msg: zip_message });
-        }
-    });
-});
- */
 
 app.get('/player_state/run_id/:run_id/round/:round', (req, res) => {
     const run_name = req.params.run_id;
