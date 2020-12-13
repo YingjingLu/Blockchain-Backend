@@ -6,6 +6,7 @@ const cors = require('cors');
 const app = express();
 const fs = require('fs');
 const path = require('path');
+const e = require('express');
 // middle ware
 app.use(express.static('public')); //to access the files in public folder
 app.use(cors()); // it enables all cors requests
@@ -66,8 +67,13 @@ app.post('/exec', (req, res) => {
         if (err) {
             return res.status(500).send({ message: err });
         }
-        util.extract_zip_file(zip_file_directory, util.get_abs_exec_folder());
-        util.delete_file(zip_file_directory);
+        try {
+            util.extract_zip_file(zip_file_directory, util.get_abs_exec_folder());
+            util.delete_file(zip_file_directory);
+        } catch(e) {
+            return res.status(500).send({message: e.toString()});
+        }
+        
         // run_name.zip
         const run_name = util.get_run_name_from_zip(myFile.name);
         const run_folder_full_path = util.get_abs_exec_run_folder(run_name);
@@ -79,8 +85,14 @@ app.post('/exec', (req, res) => {
                 console.log(stderr);
                 return res.status(500).send({message: stderr });
             }
-            const abs_zip_path = util.get_abs_exec_result_zip_path(run_name);
-            var zip_message = util.zip_folder(run_folder_full_path, abs_zip_path);
+            var zip_message;
+            try {
+                const abs_zip_path = util.get_abs_exec_result_zip_path(run_name);
+                zip_message = util.zip_folder(run_folder_full_path, abs_zip_path);
+            } catch (e) {
+                return res.status(500).send({message: e.toString()});
+            }
+            
             if (util.file_exists(abs_zip_path)) {
                 return res.status(200).send({"message": "Succeeded"});
             } else {
@@ -98,9 +110,14 @@ app.get('/player_state/run_id/:run_id/round/:round', (req, res) => {
     if (!util.file_exists(file_path)) {
         return res.status(500).send({message: "file not found" + file_path});
     }
-    const json_body = util.read_json_file(file_path);
-    console.log(json_body)
-    return res.status(200).send({data: json_body});
+    try{
+        const json_body = util.read_json_file(file_path);
+        console.log(json_body)
+        return res.status(200).send({data: json_body});
+    } catch (e) {
+        return res.status(500).send({message: e.toString()});
+    }
+    
 });
 
 app.get('/message/run_id/:run_id/round/:round', (req, res) => {
@@ -110,17 +127,27 @@ app.get('/message/run_id/:run_id/round/:round', (req, res) => {
     if (!util.file_exists(file_path)) {
         return res.status(500).send({message: "file not found" + file_path});
     }
-    const proposal_path = util.get_proposal_file_name(run_name, round);
-    const json_body = util.read_json_file(file_path);
-    if (util.file_exists(proposal_path)) {
-        json_body.proposal = util.read_json_file(proposal_path);
+    try {
+        const proposal_path = util.get_proposal_file_name(run_name, round);
+        const json_body = util.read_json_file(file_path);
+        if (util.file_exists(proposal_path)) {
+            json_body.proposal = util.read_json_file(proposal_path);
+        }
+        return res.status(200).send({data: json_body});
+    } catch (e) {
+        return res.status(500).send({message: e.toString()});
     }
-    return res.status(200).send({data: json_body});
+    
 });
 
 app.get('/list_run', (req, res) => {
-    var files = util.get_all_run();
-    return res.status(200).send({data: files});
+    try {
+        var files = util.get_all_run();
+        return res.status(200).send({data: files});
+    } catch (e) {
+        return res.status(500).send({message: "Failed to list all cases, error: " + e.toString()});
+    }
+    
 });
 
 app.get('/get_run/:run_zip_name', (req, res) => {
