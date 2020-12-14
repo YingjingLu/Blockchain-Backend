@@ -163,13 +163,23 @@ app.get('/get_run/:run_zip_name', (req, res) => {
 
 app.get('/config/run_id/:run_id', (req, res) => {
     const run_name = req.params.run_id;
-    const file_path = util.get_config_file_path(run_name);
-    if (!util.file_exists(file_path)) {
+    const config_path = util.get_config_file_path(run_name);
+    const message_path = util.get_message_file_name(run_name, 0);
+    const state_path = util.util.get_player_state_file_name(run_name, -1);
+    if (!util.file_exists(config_path)) {
         return res.status(500).send({message: 'Config file not found for ' + run_name});
     }
+    if (!util.file_exists(message_path)) {
+        return res.status(500).send({message: 'Message file of round 0 not found for ' + run_name});
+    }
+    if (!util.file_exists(state_path)) {
+        return res.status(500).send({message: 'Init player state file not found for ' + run_name});
+    }
     try {
-        const json_body = util.read_json_file(file_path);
-        return res.status(200).send({data: json_body});
+        const config_body = util.read_json_file(config_path);
+        const state_body = util.read_json_file(state_path);
+        const message_body = util.read_json_file(message_path);
+        return res.status(200).send({config: config_body, state_trace: state_body, message_trace: message_body});
     } catch (e) {
         return res.status(500).send({message: e.toString()});
     }
