@@ -165,7 +165,7 @@ app.get('/config/run_id/:run_id', (req, res) => {
     const run_name = req.params.run_id;
     const config_path = util.get_config_file_path(run_name);
     const message_path = util.get_message_file_name(run_name, 0);
-    const state_path = util.util.get_player_state_file_name(run_name, -1);
+    const state_path = util.get_player_state_file_name(run_name, -1);
     if (!util.file_exists(config_path)) {
         return res.status(500).send({message: 'Config file not found for ' + run_name});
     }
