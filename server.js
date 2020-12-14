@@ -161,7 +161,7 @@ app.get('/get_run/:run_zip_name', (req, res) => {
     }
 });
 
-app.get('/streamlet_config/run_id/:run_id', (req, res) => {
+app.get('/config/run_id/:run_id', (req, res) => {
     const run_name = req.params.run_id;
     const file_path = util.get_config_file_path(run_name);
     if (!util.file_exists(file_path)) {
@@ -169,7 +169,7 @@ app.get('/streamlet_config/run_id/:run_id', (req, res) => {
     }
     try {
         const json_body = util.read_json_file(file_path);
-        return res.status(200).send({data: json_body.streamlet_config});
+        return res.status(200).send({data: json_body});
     } catch (e) {
         return res.status(500).send({message: e.toString()});
     }
