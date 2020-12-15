@@ -40,11 +40,15 @@ app.post('/upload', (req, res) => {
                 return res.status(500).send({ message: stderr });
             }
             const abs_zip_path = util.get_abs_exec_result_zip_path(run_name);
-            var zip_message = util.zip_folder(run_folder_full_path, abs_zip_path);
-            if (util.file_exists(abs_zip_path)) {
-                return res.status(200).send({ name: run_name, path: run_folder_full_path});
-            } else {
-                return res.status(500).send({ message: zip_message });
+            try {
+                var zip_message = util.zip_folder(run_folder_full_path, abs_zip_path);
+                if (util.file_exists(abs_zip_path)) {
+                    return res.status(200).send({ name: run_name, path: run_folder_full_path});
+                } else {
+                    return res.status(500).send({ message: "Did not find result zip folder" });
+                }
+            } catch (e) {
+                return res.status(500).send({ message: e.toString() });
             }
         });
         // returing the response with file path and name
