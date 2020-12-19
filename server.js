@@ -4,7 +4,8 @@ const express = require('express');
 const fileUpload = require('express-fileupload');
 const cors = require('cors');
 const app = express();
-const fs = require('fs');
+const FS = require('fs');
+const ARCHIVER = require('archiver');
 const path = require('path');
 const e = require('express');
 // middle ware
@@ -92,12 +93,18 @@ app.post('/exec', (req, res) => {
             var zip_message;
             try {
                 const abs_zip_path = util.get_abs_exec_result_zip_path(run_name);
-                zip_message = util.zip_folder(run_folder_full_path, abs_zip_path);
-                if (util.file_exists(abs_zip_path)) {
-                    return res.status(200).send({"message": "Succeeded"});
-                } else {
+                const output = FS.createWriteStream(abs_zip_path);
+                const archive = ARCHIVER('zip');
+                var zip_message = {"output_zip": abs_zip_path};
+                output.on('close', function() {
+                    return res.status(200).send({"result": "Succeeded"});
+                });
+                archive.on('error', function(err){
                     return res.status(500).send({message: zip_message});
-                }
+                });
+                archive.pipe(output);
+                archive.directory(run_folder_full_path, false);
+                archive.finalize();
             } catch (e) {
                 return res.status(500).send({message: e.toString()});
             }
